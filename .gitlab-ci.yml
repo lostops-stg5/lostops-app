@@ -13,9 +13,7 @@ build_sample-app:
   artifacts:
     paths:
       - sample-app/
-  tags:
-    - php
-    - default
+
 
 docker_php_sample-app:
   stage: package
