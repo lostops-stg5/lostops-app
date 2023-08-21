@@ -1,3 +1,8 @@
+stages:
+- build
+- package 
+- deploy
+
 build_sample-app:
   stage: build
   image: registry.infra.connectwork.fr/expressweb/devops/php:main
