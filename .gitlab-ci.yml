@@ -1,11 +1,12 @@
 stages:
 - build
+- test
 - package 
 - deploy
 
 build_sample-app:
   stage: build
-  image: registry.infra.connectwork.fr/expressweb/devops/php:main
+  image: registry.infra.connectwork.fr/expressweb/devops/php8:main
   script:
     - cd sample-app/
     - cat ${ENV} > .env
@@ -14,6 +15,17 @@ build_sample-app:
     paths:
       - sample-app/
 
+test_sample-app:
+  stage: test
+  image: registry.infra.connectwork.fr/expressweb/devops/php8:main
+  script:
+    - cd sample-app/
+    - php artisan migrate:fresh
+    - php artisan db:seed
+    - vendor/bin/phpunit
+  needs:
+    - job: "build_sample-app"
+      artifacts: true
 
 docker_php_sample-app:
   stage: package
