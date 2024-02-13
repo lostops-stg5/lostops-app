@@ -15,7 +15,9 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
   app:
-    image: trunk94/sample-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "8081:80"
     environment:
