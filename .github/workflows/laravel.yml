@@ -34,14 +34,14 @@ jobs:
       run: php -r "file_exists('.env') || copy('.env.example', '.env');"
     - name: Install Dependencies
       run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-    - name: Generate key
-      run: php artisan key:generate
+    - name: Start mysql service
+      run: sudo /etc/init.d/mysql start
     - name: Directory Permissions
       run: chmod -R 777 storage bootstrap/cache
-    - name: Create Database
+    - name: Prepare the application
       run: |
-        mkdir -p database
-        touch database/database.sqlite
+        php -r "file_exists('.env') || copy('.env.example', '.env');"
+        php artisan key:generate
     - name: Migrate database
       run: php artisan migrate
     - name: Generating seed
