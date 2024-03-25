@@ -20,26 +20,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Create .env file from secure vars
+      run: |
+        touch .env
+        echo DB_CONNECTION=${{ secrets.DB_CONNECTION }} >> .env
+        echo "DB_HOST=127.0.0.1" >> .env
+        echo DB_PORT=${{ secrets.DB_PORT }} >> .env
+        echo DB_DATABASE=${{ secrets.DB_DATABASE }} >> .env
+        echo DB_USERNAME=${{ secrets.DB_USERNAME }} >> .env
+        echo DB_PASSWORD=${{ secrets.DB_PASSWORD }} >> .env
     - name: Laravel Setup
-      env:
-        DB_CONNECTION: ${{ secrets.DB_CONNECTION }}
-        DB_HOST: 127.0.0.1
-        DB_PORT: ${{ secrets.DB_PORT }}
-        DB_DATABASE: ${{ secrets.DB_DATABASE }}
-        DB_USERNAME: ${{ secrets.DB_USERNAME }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       run: |
         composer install -q --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
         php artisan key:generate
         chmod -R 777 storage bootstrap/cache
     - name: Execute tests (Unit and Feature tests) via PHPUnit
-      env:
-        DB_CONNECTION: ${{ secrets.DB_CONNECTION }}
-        DB_HOST: 127.0.0.1
-        DB_PORT: ${{ secrets.DB_PORT }}
-        DB_DATABASE: ${{ secrets.DB_DATABASE }}
-        DB_USERNAME: ${{ secrets.DB_USERNAME }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       run: |
         php artisan migrate
         vendor/phpunit/phpunit/phpunit
