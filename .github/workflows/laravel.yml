@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    
     - name: Create .env file from secure vars
       run: |
         touch .env
@@ -29,12 +30,17 @@ jobs:
         echo DB_DATABASE=${{ secrets.DB_DATABASE }} >> .env
         echo "DB_USERNAME=db_user" >> .env
         echo DB_PASSWORD=${{ secrets.DB_PASSWORD }} >> .env
-    - name: Laravel Setup
-      run: |
-        composer install -q --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
-        php artisan key:generate
-        chmod -R 777 storage bootstrap/cache
-    - name: Execute tests (Unit and Feature tests) via PHPUnit
-      run: |
-        php artisan migrate --force
-        vendor/phpunit/phpunit/phpunit
+        
+    - name: Install PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.0
+
+    - name: Install composer dependencies
+      run: composer install --no-scripts
+
+    - name: Prepare Laravel Application
+      run: php artisan key:generate
+
+    - name: Run Test suite
+      run: php artisan test
