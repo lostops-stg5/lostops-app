@@ -42,5 +42,8 @@ jobs:
     - name: Prepare Laravel Application
       run: php artisan key:generate
 
+    - name: Migrate database
+      run: php artisan migrate --force
+
     - name: Run Test suite
       run: php artisan test
