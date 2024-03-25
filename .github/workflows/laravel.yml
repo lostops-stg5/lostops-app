@@ -30,6 +30,7 @@ jobs:
         echo DB_DATABASE=${{ secrets.DB_DATABASE }} >> .env
         echo DB_USERNAME=${{ secrets.DB_USERNAME }} >> .env
         echo DB_PASSWORD=${{ secrets.DB_PASSWORD }} >> .env
+        chmod -744 .env
         
     - name: Install PHP
       uses: shivammathur/setup-php@v2
@@ -40,9 +41,7 @@ jobs:
       run: composer install --no-scripts
 
     - name: Prepare Laravel Application
-      run: |
-        php artisan key:generate
-        php artisan config:cache
+      run: php artisan key:generate
 
     - name: Migrate database
       run: php artisan migrate --force
