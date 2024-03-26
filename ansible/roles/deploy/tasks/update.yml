@@ -1,0 +1,12 @@
+---
+- name: Login to docker repository
+  community.docker.docker_login:
+    password: "{{ DOCKERHUB_PASSWORD }}"
+    username: "{{ DOCKERHUB_USERNAME }}"
+
+- name: Pulling & Running new image
+  community.docker.docker_image:
+    name: lostops-app
+    state: present
+    repository: ghcr.io/lostops-stg5
+    tag: "{{ APP_VERSION }}"

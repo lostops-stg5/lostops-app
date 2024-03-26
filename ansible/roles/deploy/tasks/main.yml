@@ -1,0 +1,8 @@
+---
+- name: Remove old configuration
+  ansible.builtin.include_tasks: shutdown.yml
+  tags: [shutdown]
+
+- name: Deploy new configuration
+  ansible.builtin.include_tasks: update.yml
+  tags: [update]

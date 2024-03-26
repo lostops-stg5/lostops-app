@@ -1,0 +1,8 @@
+---
+- name: Updating
+  hosts: web
+  remote_user: lostops
+  vars_files:
+    - ./vault.yml
+  roles:
+    - deploy
