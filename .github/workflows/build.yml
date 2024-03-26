@@ -21,12 +21,18 @@ jobs:
       - name: Push image to hub
         run: docker push --all-tags ghcr.io/lostops-stg5/lostops-app
   security-scan:
-    name: security-scan
+    name: Security scan
     runs-on: ubuntu-20.04
     needs: build
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Log in to Docker Hub
+        run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login ghcr.io -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Push image to hub
+        run: docker pull ghcr.io/lostops-stg5/lostops-app:${{ github.event.release.name }}
 
       - name: Run Trivy vulnerability scanner
         continue-on-error: true
