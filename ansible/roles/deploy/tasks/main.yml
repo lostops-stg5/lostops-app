@@ -1,8 +1,57 @@
 ---
-- name: Remove old configuration
-  ansible.builtin.include_tasks: shutdown.yml
-  tags: [shutdown]
+- name: Get running container
+  community.docker.docker_host_info:
+    docker_host: "unix:///run/user/1500/docker.sock"
+    containers: yes
+    containers_filters:
+      name: web-app
+  register: containers_info
 
-- name: Deploy new configuration
-  ansible.builtin.include_tasks: update.yml
-  tags: [update]
+- name: Stop running container
+  community.docker.docker_container:
+    docker_host: "unix:///run/user/1500/docker.sock"
+    name: "{{ item }}"
+    state: stopped
+  loop: "{{ containers_info.containers | map(attribute='Id') | list }}"
+  when: containers_info.containers | length > 0
+
+- name: Remove Stopped docker containers
+  ansible.builtin.shell: |
+    docker rm web-app;
+  when: containers_info.containers | length > 0
+
+- name: Get old images
+  community.docker.docker_host_info:
+    docker_host: "unix:///run/user/1500/docker.sock"
+    images: true
+    images_filters:
+      reference: "ghcr.io/lostops-stg5/lostops-app"
+  register: images_info
+
+- name: Deleting old images
+  community.docker.docker_image_remove:
+    docker_host: "unix:///run/user/1500/docker.sock"
+    name: "{{ item }}"
+    force: true
+  loop: "{{ images_info.images | map(attribute='Id') | list }}"
+  when: images_info.images | length > 0
+
+- name: Login to docker repository
+  community.docker.docker_login:
+    docker_host: "unix:///run/user/1500/docker.sock"
+    registry_url: "https://ghcr.io/lostops-stg5"
+    password: "{{ DOCKERHUB_PASSWORD }}"
+    username: "{{ DOCKERHUB_USERNAME }}"
+
+- name: Pulling & running this new image
+  community.docker.docker_container:
+    docker_host: "unix:///run/user/1500/docker.sock"
+    name: web-app
+    image: "ghcr.io/lostops-stg5/lostops-app:{{ APP_VERSION }}"
+    state: started
+    restart_policy: "on-failure"
+    recreate: true
+    pull: true
+    ports:
+      - "80:80"
+      - "443:443"
