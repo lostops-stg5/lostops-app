@@ -52,3 +52,26 @@ jobs:
         with:
           name: security-report
           path: trivy-report.html
+  deploy:
+    name: Deploying version ${{ github.event.release.name }}
+    runs-on: ubuntu-20.04
+    needs: build
+    steps:
+      - name: Run playbook
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: deploy.yml
+          directory: ./ansible/
+          key: ${{secrets.SSH_PRIVATE_KEY}}
+          configuration: |
+            [defaults]
+            [ssh_connection]
+            pipelining=True
+            [defaults]
+            host_key_checking = False
+          known_hosts: |
+            app-web812909.westeurope.cloudapp.azure.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILyYmKZlpSz2AGM99sAHTk+UxhQMxxAOYqPZilm39MtP
+          vault_password: ${{secrets.VAULT_PASSWORD}}
+          options: |
+            --inventory inventory.yml
+            --extra-vars APP_VERSION=${{ github.event.release.name }}
