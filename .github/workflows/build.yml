@@ -68,6 +68,7 @@ jobs:
           known_hosts: |
             app-web812909.westeurope.cloudapp.azure.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILyYmKZlpSz2AGM99sAHTk+UxhQMxxAOYqPZilm39MtP
           vault_password: ${{secrets.VAULT_PASSWORD}}
+          requirements: requirements.yml
           options: |
             --inventory inventory.yml
             --extra-vars APP_VERSION=${{ github.event.release.name }}
