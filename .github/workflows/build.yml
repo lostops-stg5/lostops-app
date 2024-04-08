@@ -57,11 +57,13 @@ jobs:
     runs-on: ubuntu-20.04
     needs: build
     steps:
+      - uses: actions/checkout@v2
+
       - name: Run playbook
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: deploy.yml
-          directory: ../ansible/
+          directory: ./ansible/
           key: ${{secrets.SSH_PRIVATE_KEY}}
           configuration: |
             [defaults]
