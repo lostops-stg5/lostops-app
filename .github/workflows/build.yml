@@ -65,12 +65,6 @@ jobs:
           playbook: deploy.yml
           directory: ./ansible/
           key: ${{secrets.SSH_PRIVATE_KEY}}
-          configuration: |
-            [defaults]
-            [ssh_connection]
-            pipelining=True
-            [defaults]
-            host_key_checking = False
           known_hosts: |
             app-web812909.westeurope.cloudapp.azure.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILyYmKZlpSz2AGM99sAHTk+UxhQMxxAOYqPZilm39MtP
           vault_password: ${{secrets.VAULT_PASSWORD}}
