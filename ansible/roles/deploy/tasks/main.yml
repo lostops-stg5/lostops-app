@@ -49,7 +49,7 @@
     name: web-app
     image: "ghcr.io/lostops-stg5/lostops-app:{{ APP_VERSION }}"
     state: started
-    restart_policy: "on-failure"
+    restart_policy: "always"
     recreate: true
     pull: true
     ports:
