@@ -52,6 +52,12 @@
     restart_policy: "always"
     recreate: true
     pull: true
+    networks:
+      - name: traefik_network
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.web-app.entrypoints: "websecure"
+      traefik.http.routers.web-app.rule: "Host(`app.lostops.notmuji.com`)"
     ports:
-      - "80:80"
-      - "443:443"
+      - "80"
+      - "443"
