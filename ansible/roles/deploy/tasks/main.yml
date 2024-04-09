@@ -52,6 +52,16 @@
     restart_policy: "always"
     recreate: true
     pull: true
+    env:
+      APP_DEBUG: "false"
+      APP_ENV: "production"
+      APP_KEY: "base64:DJYTvaRkEZ/YcQsX3TMpB0iCjgme2rhlIOus9A1hnj4="
+      DB_CONNECTION: "mysql"
+      DB_HOST: "db.lostops.notmuji.com"
+      DB_PORT: "3306"
+      DB_DATABASE: "lostopsdb"
+      DB_USERNAME: "{{ mysql_username | string }}"
+      DB_PASSWORD: "{{ mysql_password | string }}"
     networks:
       - name: traefik_network
     labels:
