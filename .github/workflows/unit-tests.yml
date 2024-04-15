@@ -1,6 +1,10 @@
-name: Laravel
+name: Unit-tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
 
 jobs:
   laravel-tests:
@@ -25,12 +29,12 @@ jobs:
         run: |
           touch .env
           echo DB_CONNECTION=${{ secrets.DB_CONNECTION }} >> .env
-          echo "DB_HOST=127.0.0.1" >> .env
+          echo DB_HOST=${{ secrets.DB_HOST }} >> .env
           echo DB_PORT=${{ secrets.DB_PORT }} >> .env
           echo DB_DATABASE=${{ secrets.DB_DATABASE }} >> .env
           echo DB_USERNAME=${{ secrets.DB_USERNAME }} >> .env
           echo DB_PASSWORD=${{ secrets.DB_PASSWORD }} >> .env
-          chmod -744 .env
+          echo APP_KEY= >> .env
 
       - name: Install PHP
         uses: shivammathur/setup-php@v2

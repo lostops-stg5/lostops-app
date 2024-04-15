@@ -1,0 +1,4 @@
+web: # corresponding to "host: web" in playbook
+  hosts:
+    web:
+      ansible_host: app-web812909.westeurope.cloudapp.azure.com
