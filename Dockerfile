@@ -18,13 +18,14 @@ RUN composer install
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 
-ARG ENV_CONTENT="DB_CONNECTION=mysql\nDB_HOST=xxx.xxx.xxx.xxx\nDB_PORT=3306\nDB_DATABASE=db_name\nDB_USERNAME=username\nDB_PASSWORD=passwd"
+ARG ENV_CONTENT="DB_CONNECTION=mysql\nDB_HOST=xxx.xxx.xxx.xxx\nDB_PORT=3306\nDB_DATABASE=db_name\nDB_USERNAME=username\nDB_PASSWORD=passwd\nAPP_KEY="
 RUN echo ${ENV_CONTENT} > .env
 
 # Modifiez la configuration d'Apache pour pointer vers le répertoire public
 ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+RUN cat .env
 RUN php artisan key:generate
 RUN php artisan migrate --force
 
