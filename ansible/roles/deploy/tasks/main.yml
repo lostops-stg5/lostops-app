@@ -64,16 +64,6 @@
     restart_policy: "always"
     recreate: true
     pull: true
-    env:
-      APP_DEBUG: "false"
-      APP_ENV: "production"
-      DB_CONNECTION: "mysql"
-      DB_HOST: "db.lostops.notmuji.com"
-      DB_PORT: "3306"
-      DB_DATABASE: "lostopsdb"
-      DB_USERNAME: "{{ mysql_username | string }}"
-      DB_PASSWORD: "{{ mysql_password | string }}"
-      APP_KEY: ""
     networks:
       - name: traefik_network
     labels:
@@ -84,44 +74,3 @@
       - "80"
   tags:
     - running
-
-- name: Generate .env file
-  community.docker.docker_container_exec:
-    docker_host: "unix:///run/user/1500/docker.sock"
-    container: "{{ CONTAINER_NAME }}"
-    argv:
-      - /bin/bash
-      - "-c"
-      - 'rm .env;
-        echo "APP_ENV=production" >> .env;
-        echo "DB_CONNECTION=mysql" >> .env;
-        echo "DB_HOST=db.lostops.notmuji.com" >> .env;
-        echo "DB_PORT=3306" >> .env;
-        echo "DB_DATABASE=lostopsdb" >> .env;
-        echo "DB_USERNAME={{ mysql_username | string }}" >> .env;
-        echo "DB_PASSWORD={{ mysql_password | string }}" >> .env;
-        echo "APP_KEY=" >> .env;'
-  tags:
-    - setup
-
-- name: Generate app keys
-  community.docker.docker_container_exec:
-    docker_host: "unix:///run/user/1500/docker.sock"
-    container: "{{ CONTAINER_NAME }}"
-    argv:
-      - /bin/bash
-      - "-c"
-      - "php artisan key:generate"
-  tags:
-    - setup
-
-- name: Migrate database
-  community.docker.docker_container_exec:
-    docker_host: "unix:///run/user/1500/docker.sock"
-    container: "{{ CONTAINER_NAME }}"
-    argv:
-      - /bin/bash
-      - "-c"
-      - "php artisan migrate --force"
-  tags:
-    - setup
