@@ -1,0 +1,72 @@
+name: build
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    name: Building version ${{ github.event.release.name }}
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build an image from Dockerfile
+        run: docker build -t ghcr.io/lostops-stg5/lostops-app:${{ github.event.release.name }} -t ghcr.io/lostops-stg5/lostops-app:latest --build-arg="ENV_CONTENT=${{ secrets.ENV_CONTENT }}" .
+
+      - name: Log in to Docker Hub
+        run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login ghcr.io -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Push image to hub
+        run: docker push --all-tags ghcr.io/lostops-stg5/lostops-app
+  security-scan:
+    name: Security scan of version ${{ github.event.release.name }}
+    runs-on: ubuntu-20.04
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Log in to Docker Hub
+        run: echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login ghcr.io -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Pull image from hub
+        run: docker pull ghcr.io/lostops-stg5/lostops-app:${{ github.event.release.name }}
+
+      - name: Run Trivy vulnerability scanner
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ghcr.io/lostops-stg5/lostops-app:${{ github.event.release.name }}
+          format: template
+          template: "@/contrib/html.tpl"
+          output: trivy-report.html
+          exit-code: "1"
+          ignore-unfixed: true
+          vuln-type: "os,library"
+          severity: "CRITICAL,HIGH"
+
+      - name: Archivate report into artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: trivy-report.html
+  deploy:
+    name: Deploying version ${{ github.event.release.name }}
+    runs-on: ubuntu-20.04
+    needs: build
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Run playbook
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: deploy.yml
+          directory: ./ansible/
+          key: ${{secrets.SSH_PRIVATE_KEY}}
+          vault_password: ${{secrets.VAULT_PASSWORD}}
+          requirements: requirements.yml
+          options: |
+            --inventory inventory.yml
+            --extra-vars APP_VERSION=${{ github.event.release.name }}
